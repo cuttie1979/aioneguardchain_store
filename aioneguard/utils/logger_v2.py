@@ -53,7 +53,7 @@ def _format_msg(log_msg):
     return f"[{caller}] - {log_msg}"
 
 
-def log_info(msg): logger.info(_format_msg(msg))
-def log_error(msg): logger.error(_format_msg(msg))
-def log_warning(msg): logger.warning(_format_msg(msg))
-def log_debug(msg): logger.debug(_format_msg(msg))
+def log_info(log_msg): logger.info(_format_msg(log_msg))
+def log_error(log_msg): logger.error(_format_msg(log_msg))
+def log_warning(log_msg): logger.warning(_format_msg(log_msg))
+def log_debug(log_msg): logger.debug(_format_msg(log_msg))
