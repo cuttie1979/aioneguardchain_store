@@ -20,10 +20,7 @@ RUN CORES=$(nproc) && \
     cmake -S liboqs -B liboqs/build -DBUILD_SHARED_LIBS=ON && \
     cmake --build liboqs/build --parallel $CORES && \
     cmake --build liboqs/build --target install && \
-    git clone --depth=1 https://github.com/open-quantum-safe/liboqs-python && \
-    cd liboqs-python && \
-    pip install --no-cache-dir . && \
-    cd ..
+    git clone --depth=1 https://github.com/open-quantum-safe/liboqs-python
 
 # Runtime stage
 FROM python:3.12-alpine3.21
@@ -40,15 +37,19 @@ ENV PYTHONPATH=/app
 # Copy built artifacts from builder
 COPY --from=builder /usr/local/lib/liboqs* /usr/local/lib/
 COPY --from=builder /usr/local/include/oqs /usr/local/include/oqs/
-COPY --from=builder /usr/local/lib/python3.12/site-packages/oqs /usr/local/lib/python3.12/site-packages/oqs/
-
+COPY --from=builder /app/liboqs-python /app/liboqs-python
 # Copy application code and certificate
 COPY aioneguard /app/aioneguard
+COPY pyproject.toml README.md setup.py /app/
 COPY conf/rootCA.pem /app/rootCA.pem
 
 # Final setup and cleanup
 RUN pip install --upgrade pip setuptools certifi --no-cache-dir && \
     cat /app/rootCA.pem >> /usr/local/lib/python3.12/site-packages/certifi/cacert.pem && \
+    cd liboqs-python && \
+    pip install --no-cache-dir . && \
+    cd .. && \
+    python setup.py install && \
     rm -rf /app/rootCA.pem /root/.cache/pip /tmp/* /var/tmp/* /var/cache/apk/* && \
     mkdir -p /app/data /app/conf /app/logs
 
