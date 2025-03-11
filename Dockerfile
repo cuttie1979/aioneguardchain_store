@@ -16,7 +16,7 @@ RUN CORES=$(nproc) && \
     echo "Detected $CORES cores." && \
     export CMAKE_BUILD_PARALLEL_LEVEL=$CORES && \
     export MAKEFLAGS="-j$CORES" && \
-    git clone --depth=1 https://github.com/open-quantum-safe/liboqs && \
+    git clone --depth=1 --branch 0.12.0 https://github.com/open-quantum-safe/liboqs.git && \
     cmake -S liboqs -B liboqs/build -DBUILD_SHARED_LIBS=ON && \
     cmake --build liboqs/build --parallel $CORES && \
     cmake --build liboqs/build --target install && \
@@ -30,12 +30,12 @@ LABEL version="1.0.0"
 WORKDIR /app
 
 # Install only runtime dependencies
-RUN apk update && apk add --no-cache \
-    openssl  # Required if liboqs needs OpenSSL at runtime
+RUN apk update && apk add --no-cache openssl
 ENV PYTHONPATH=/app
-
-# Copy built artifacts from builder
-COPY --from=builder /usr/local/lib/liboqs* /usr/local/lib/
+RUN mkdir -p /root/_oqs/lib
+COPY --from=builder /usr/local/lib/liboqs* /root/_oqs/lib
+COPY --from=builder /usr/local/lib/cmake/liboqs /usr/local/lib/cmake/liboqs/
+COPY --from=builder /usr/local/lib/pkgconfig/liboqs.pc /usr/local/lib/pkgconfig/
 COPY --from=builder /usr/local/include/oqs /usr/local/include/oqs/
 COPY --from=builder /app/liboqs-python /app/liboqs-python
 # Copy application code and certificate
