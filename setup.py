@@ -25,9 +25,8 @@ setup(
     ],
     python_requires=">=3.6",
     install_requires=[
-        'aioneguard-utils', 'fastapi', 'uvicorn', 'pydantic', 'starlette', 'jinja2', 'websockets',
-        'requests', 'pytz', 'boto3', 'pycryptodome', 'cryptography', 'pynacl', 'liboqs-python',
-        'argon2-cffi'
+        'fastapi', 'uvicorn', 'pydantic', 'starlette', 'jinja2', 'websockets', 'requests', 'pytz',
+        'boto3', 'pycryptodome', 'cryptography', 'pynacl', 'liboqs-python', 'argon2-cffi'
     ],
     license="Proprietary",
     license_files=["LICENSE"],
