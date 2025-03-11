@@ -1,33 +1,59 @@
-#########################################
-# Author: Laszlo Popovics               #
-# Version: 1.0                          #
-# Program: AIOneGuard - Logger v2 Class #
-#########################################
-
-# Import the required libraries
-from inspect import stack
-from os import getcwd
-from aioneguard.utils import logger
-from os import getenv
-
-# Initialize the logger class
-_logger = logger.Logger.get_instance()
-_root = getcwd()
+#   AIOneGuard - Logger v2 Class
+from dataclasses import dataclass
+from datetime import datetime
+from os import getcwd, getenv
+from pytz import timezone
 
 
-def log_info(log_msg: str):
-    _logger.info(f"[{stack()[1].filename.replace(_root, '')[1:-3]}] - {log_msg}")
+@dataclass(frozen=True)
+class Severity:
+    INFO = "info"
+    ERROR = "error"
+    WARNING = "warning"
+    DEBUG = "debug"
 
 
-def log_error(log_msg: str):
+class Logger:
+    def __init__(self):
+        self.tz = timezone('Europe/Madrid')
+        self._get_debug = bool(getenv("DEBUG"))
 
-    _logger.error(f"[{stack()[1].filename.replace(_root, '')[1:-3]}] - {log_msg}")
+    @staticmethod
+    def get_instance():
+        if not hasattr(Logger, '_instance'):
+            Logger._instance = Logger()
+        return Logger._instance
+
+    def get_ts(self):
+        return datetime.now(self.tz).strftime("%Y.%m.%d %H:%M:%S.%f")[:-3]
+
+    def log(self, message, severity):
+        print(f"{self.get_ts()} [{severity.upper()}] - {message}")
+
+    def info(self, message):
+        self.log(message, Severity.INFO)
+
+    def error(self, message):
+        self.log(message, Severity.ERROR)
+
+    def warning(self, message):
+        self.log(message, Severity.WARNING)
+
+    def debug(self, message):
+        if self._get_debug:
+            self.log(message, Severity.DEBUG)
 
 
-def log_warning(log_msg: str):
-    _logger.warning(f"[{stack()[1].filename.replace(_root, '')[1:-3]}] - {log_msg}")
+logger = Logger.get_instance()
+root = getcwd()
 
 
-def log_debug(log_msg: str):
-    if getenv("DEBUG"):
-        _logger.debug(f"[{stack()[1].filename.replace(_root, '')[1:-3]}] - {log_msg}")
+def _format_msg(log_msg):
+    caller = __import__('inspect').stack()[2].filename.replace(root, '')[1:-3]
+    return f"[{caller}] - {log_msg}"
+
+
+def log_info(msg): logger.info(_format_msg(msg))
+def log_error(msg): logger.error(_format_msg(msg))
+def log_warning(msg): logger.warning(_format_msg(msg))
+def log_debug(msg): logger.debug(_format_msg(msg))

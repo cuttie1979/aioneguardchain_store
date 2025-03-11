@@ -40,16 +40,14 @@ COPY --from=builder /usr/local/include/oqs /usr/local/include/oqs/
 COPY --from=builder /app/liboqs-python /app/liboqs-python
 # Copy application code and certificate
 COPY aioneguard /app/aioneguard
-COPY pyproject.toml README.md setup.py /app/
 COPY conf/rootCA.pem /app/rootCA.pem
 
 # Final setup and cleanup
-RUN pip install --upgrade pip setuptools certifi --no-cache-dir && \
+RUN pip install --upgrade pip setuptools certifi pydantic websockets requests pytz boto3 \
+    pycryptodome cryptography pynacl argon2-cffi --no-cache-dir && \
     cat /app/rootCA.pem >> /usr/local/lib/python3.12/site-packages/certifi/cacert.pem && \
     cd liboqs-python && \
     pip install --no-cache-dir . && \
-    cd .. && \
-    python setup.py install && \
     rm -rf /app/rootCA.pem /root/.cache/pip /tmp/* /var/tmp/* /var/cache/apk/* && \
     mkdir -p /app/data /app/conf /app/logs
 
