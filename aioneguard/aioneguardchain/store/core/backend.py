@@ -242,8 +242,9 @@ class Backend:
             _key = self._encryption_key
             _encrypted_content = Message.create(_key["privkey"], _key["pubkey"], _key["kem"], _key["kem_pubkey"], _key["pubkey_hash"], payload,
                                                 self.instance_id)
-            with open(file_path, "w") as f:
-                f.write(_encrypted_content)
+            with open(file_path, "wb") as f:
+                f.write(base64.b64decode(_encrypted_content))
+            logger_v2.log_info(f"Data in {file_path} has been stored successfully...")
         except Exception as e:
             traceback.print_exc()
             logger_v2.log_error(f"Error while storing encrypted file: {e}")
@@ -253,7 +254,8 @@ class Backend:
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"File: {file_path} not found")
             _key = self._encryption_key
-            return Message.decode_message(_key["privkey"], _key["pubkey"], _key["kem"], open(file_path, "r").read())
+            _file_data = base64.b64encode(open(file_path, "rb").read())
+            return Message.decode_message(_key["privkey"], _key["pubkey"], _key["kem"], _file_data)
         except Exception as e:
             traceback.print_exc()
             logger_v2.log_error(f"Error while getting the encrypted file: {e}")
@@ -265,6 +267,7 @@ class Backend:
                 raise FileNotFoundError(f"File: {file_path} not found")
             else:
                 os.remove(file_path)
+                logger_v2.log_info(f"{file_path} deleted...")
         except Exception as e:
             traceback.print_exc()
             logger_v2.log_error(f"Error while deleting encrypted file: {e}")
