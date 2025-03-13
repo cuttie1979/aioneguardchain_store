@@ -49,6 +49,6 @@ RUN pip install --upgrade pip setuptools certifi pydantic websockets requests py
     cd liboqs-python && \
     pip install --no-cache-dir . && \
     rm -rf /app/rootCA.pem /root/.cache/pip /tmp/* /var/tmp/* /var/cache/apk/* && \
-    mkdir -p /app/data /app/conf /app/logs
+    mkdir -p /app/data /app/conf /app/logs /app/temp
 
 CMD ["python", "aioneguard/aioneguardchain/store/main.py", "start", "$INSTANCE_ID"]
